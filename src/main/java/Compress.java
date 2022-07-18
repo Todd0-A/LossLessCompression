@@ -3,7 +3,6 @@ import bitSequence.BitSequence;
 
 import java.io.*;
 import java.nio.file.Files;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -12,20 +11,26 @@ public class Compress {
 
     public static void main(String[] args) throws IOException {
         BitSequence[] encoders = Compression();
+        System.out.println("Compression Finished");
         Decompresssion(encoders);
+        System.out.println("Decompression Finished");
     }
     //Encode
     public static List<Integer> nList=new ArrayList<>();
     public static List<Integer> lList=new ArrayList<>();
     public static List<String>  FileNames= new ArrayList<>();
     public static List<HashFunction[]> HashesList= new ArrayList<>();
+    public static List<Integer> kList =new ArrayList<>();
     public static BitSequence[] Compression() throws  IOException{
+        Random random = new Random();
         String filePath="src/main/InputFiles";
         File file=new File(filePath);
         File[] files = file.listFiles();
         BitSequence[] encoders = new BitSequence[files.length];
         for(int i=0;i<files.length;i++){
-            HashFunction[] hashes = creatHashes(2);
+            int k= random.nextInt(3);
+            kList.add(k+1);
+            HashFunction[] hashes = creatHashes(k+1);
             HashesList.add(hashes);
             FileNames.add(files[i].getName());
             byte[] bytes=Files.readAllBytes(files[i].toPath());
@@ -42,27 +47,6 @@ public class Compress {
             writeByte(out.toByteArray(),"src/main/OutputFiles/"+FileNames.get(i));
         }
     }
-
-    /*public void Compressing(int k) throws IOException {
-        String filePath = "src/main/file/MP4Tes";
-        File file = new File(filePath);
-        byte[] bytes = Files.readAllBytes(file.toPath());
-        BitSequence bitSequence = new BitSequence(bytes);
-        HashFunction[] hashes = creatHashes(k);
-        BufferedWriter writer = new BufferedWriter(new FileWriter("src/main/file/Recorv", true));
-        //Encode
-        BitSequence encoder = Encoder.Encoder(bitSequence.getBitCount(), (int) (bitSequence.getBitCount()*0.28),hashes,bitSequence);
-       //Decode
-        BitSequence decoder =Decoder.Decoder(bitSequence.getBitCount(), (int) (bitSequence.getBitCount()*0.28),hashes,encoder);
-        //Recorde data
-         writer.write(bitSequence.getP()+","+k+",");
-        for(HashFunction h : hashes)
-            writer.write(h.getHashName()+"("+h.getSeed()+") ");
-        writer.write(","+bitSequence.getBitCount()+","+encoder.getBitCount()+","+decoder.getBitCount()+","+(double)encoder.getBitCount()/(double)decoder.getBitCount()+"\n");
-        //Write output to file
-        writeByte(decoder.toByteArray(),"src/main/file/out.mp4");
-        writer.close();
-    }*/
     public static HashFunction[] creatHashes(int k){
         HashFunction[] hashes =new HashFunction[k];
         Random random = new Random();
