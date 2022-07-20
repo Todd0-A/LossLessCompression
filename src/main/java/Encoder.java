@@ -1,9 +1,6 @@
 import Hashes.HashFunction;
 import bitSequence.BitSequence;
-
 import java.util.BitSet;
-
-
 public class Encoder {
 
     /*
