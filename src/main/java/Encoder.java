@@ -9,7 +9,7 @@ public class Encoder {
             Input: set, H, consisting of k random functions from {0, . . . , l − 1}{0,...,n−1};
             Input: a length-n bit sequence, I;
              */
-    public BitSequence Encoder(int n, int l, HashFunction[] H, BitSequence I){
+    public BitSequence encoder(int n, int l, HashFunction[] H, BitSequence I){
 
         //Add ture value of input to bloom filter
         int prime = HashFunction.getPrimeNumber(n);

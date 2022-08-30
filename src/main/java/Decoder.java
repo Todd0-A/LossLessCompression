@@ -8,7 +8,7 @@ public class Decoder {
     H: Hash function array of bloom filter
     B:input bloom filter and witness bit sequence
      */
-    public BitSequence Decoder(int n, int l, HashFunction[] H, BitSequence B){
+    public BitSequence decoder(int n, int l, HashFunction[] H, BitSequence B){
 
         //Construct output bit sequence
         BitSequence output=new BitSequence(new byte[n/8]);

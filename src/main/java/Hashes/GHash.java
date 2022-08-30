@@ -16,7 +16,7 @@ public class GHash implements HashFunction{
 
     @Override
     public int hash(int n, int value, int p) {
-        return hash1.hash(n,value,p)+this.i*bkdrHash.hash(n,value,p);
+        return (hash1.hash(n,value,p)+this.i*bkdrHash.hash(n,value,p))%n;
     }
     @Override
     public String getHashName() {

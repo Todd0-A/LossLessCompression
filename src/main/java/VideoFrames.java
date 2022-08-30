@@ -37,6 +37,7 @@ public class VideoFrames{
     private int LowBitsNum;
     private byte[][] LowBits;
     private ColorSpace color;
+
     public VideoFrames(File file) throws IOException, JCodecException {
       this.grab = FrameGrab.createFrameGrab(NIOUtils.readableChannel(file));
       this.picture=grab.getNativeFrame();
@@ -50,34 +51,18 @@ public class VideoFrames{
     }
 
     //Video frames encode
-    public List<BitSequence> VideoCompression() throws IOException {
+    public List<BitSequence> VideoEncode() throws IOException {
         byte[][] data=picture.getData();
         BitSequence bitSequence=PictureDataToBitSequence(data);
         List<BitSequence> out = new ArrayList<>();
         out.add(PictureDataToBitSequence(data));
-        int count=0;
+        System.out.println(out.get(0).getP());
         while (null != (picture = grab.getNativeFrame())) {
-            count++;
             BitSequence xor= bitSequence.xor(PictureDataToBitSequence(picture.getData()));
             bitSequence=PictureDataToBitSequence(picture.getData());
             out.add(xor);
-            System.out.println("FrameDataSize:\t"+ bitSequence.getBitCount()+"\tFrameNumber\t"+ out.size()+"\tP=\t"+out.get(count).getP());
-        }
-        return out;
-    }
-    public List<BitSequence> VideoCompression1(List<BitSequence> input) throws IOException {
-
-        BitSequence bitSequence=input.get(0);
-        List<BitSequence> out = new ArrayList<>();
-        out.add(bitSequence);
-        int count=0;
-        for(int i=1;i<input.size();i++){
-            count++;
-            BitSequence xor= bitSequence.xor(input.get(i));
-            bitSequence=input.get(i);
-            out.add(xor);
-            System.out.println("FrameDataSize:\t"+ bitSequence.getBitCount()+"\tFrameNumber\t"+ out.size()+"\tP=\t"+out.get(count).getP());
-        }
+            System.out.println(bitSequence.getP()+"\t"+xor.getP());
+            }
         return out;
     }
     public List<BitSequence> VideoDecompression1(List<BitSequence> input) throws IOException, JCodecException {
@@ -94,7 +79,7 @@ public class VideoFrames{
         return out;
     }
     //Video frames decode
-    public void VideoDecompression(List<BitSequence> input) throws IOException, JCodecException {
+    public void VideoDecode(List<BitSequence> input) throws IOException, JCodecException {
         grab.seekToSecondSloppy(0);
         picture=grab.getNativeFrame();
         byte[][] data=picture.getData();
@@ -119,10 +104,10 @@ public class VideoFrames{
             NIOUtils.closeQuietly(out);
         }
     }
-    public BitSequence PictureDataToBitSequence(byte[][] data){
+    private BitSequence PictureDataToBitSequence(byte[][] data){
         return new BitSequence(ByteArrToByte(data,data.length,data[0].length));
     }
-    public byte[][] ByteArrToByte(byte[] b, int nNum1, int nNum2)
+    private byte[][] ByteArrToByte(byte[] b, int nNum1, int nNum2)
     {
         byte[][] newB = new byte[nNum1][nNum2];
         for (int i = 0; i < nNum1; i++)
@@ -134,7 +119,7 @@ public class VideoFrames{
         }
         return newB;
     }
-    public byte[] ByteArrToByte(byte[][] b, int nNum1, int nNum2)
+    private byte[] ByteArrToByte(byte[][] b, int nNum1, int nNum2)
     {
         List<Byte> list = new ArrayList<>();
         for (int i = 0; i < nNum1; i++)

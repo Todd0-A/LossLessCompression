@@ -7,7 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
-public class Compress {
+public class Compress_Decompress {
 
     private List<Integer> nList;//recorde number of bits of each file
     private List<Integer> lList;//recorde length of each bloom filter bit sequence for each file
@@ -16,7 +16,7 @@ public class Compress {
     private List<Integer> kList;//recorde number of hash functions for each bloom filter
     private Encoder encoder;
     private Decoder decoder;
-    public Compress() {
+    public Compress_Decompress() {
         this.encoder= new Encoder();
         this.nList=new ArrayList<>();
         this.lList=new ArrayList<>();
@@ -45,7 +45,7 @@ public class Compress {
             this.kList.add(k);
             HashFunction[] hashes = creatHashes(k);
             this.HashesList.add(hashes);
-            encoders[i] = encoder.Encoder(this.nList.get(i),this.lList.get(i),hashes,bitSequence);
+            encoders[i] = encoder.encoder(this.nList.get(i),this.lList.get(i),hashes,bitSequence);
             System.out.println(bitSequence.getP()+"\t"+kList.get(i)+"\t"+(double)(bitSequence.getBitCount())/(double)(encoders[i].getBitCount()));
         }
         return  encoders;
@@ -63,7 +63,7 @@ public class Compress {
             this.HashesList.add(hashes);
             this.nList.add(list.get(i).getBitCount());
             this.lList.add((int) (list.get(i).getBitCount()*0.271));
-            encoders[i] = encoder.Encoder(this.nList.get(i),this.lList.get(i),hashes,list.get(i));
+            encoders[i] = encoder.encoder(this.nList.get(i),this.lList.get(i),hashes,list.get(i));
             System.out.println(list.get(i).getP()+"\t"+kList.get(i)+"\t"+(double) (list.get(i).getBitCount())/(double) (encoders[i].getBitCount()));
         }
         return  encoders;
@@ -71,7 +71,7 @@ public class Compress {
     //Files decompression
     public void  DeCompression(BitSequence[] encoders){
         for(int i=0;i<encoders.length;i++){
-            BitSequence out=decoder.Decoder(this.nList.get(i),this.lList.get(i),this.HashesList.get(i),encoders[i]);
+            BitSequence out=decoder.decoder(this.nList.get(i),this.lList.get(i),this.HashesList.get(i),encoders[i]);
             writeByte(out.toByteArray(),"src/main/OutputFiles/Out_"+this.FileNames.get(i));
         }
     }
@@ -79,13 +79,13 @@ public class Compress {
     public List<BitSequence>  VDecompression(BitSequence[] encoders){
         List<BitSequence> decoder =new ArrayList<>();
         for(int i=0;i<encoders.length;i++){
-            BitSequence out=this.decoder.Decoder(this.nList.get(i),this.lList.get(i),this.HashesList.get(i),encoders[i]);
+            BitSequence out=this.decoder.decoder(this.nList.get(i),this.lList.get(i),this.HashesList.get(i),encoders[i]);
             decoder.add(out);
         }
         return  decoder;
     }
     //creat a k number hash function array
-    public HashFunction[] creatHashes(int k){
+    private HashFunction[] creatHashes(int k){
         HashFunction[] hashes =new HashFunction[k];
         Random random = new Random();
         for(int i=0;i<k;i++){
@@ -95,7 +95,7 @@ public class Compress {
         return hashes;
     }
     //write byte array to file
-    public void writeByte(byte[] bytes,String filePath)
+    private void writeByte(byte[] bytes,String filePath)
     {
         File file = new File(filePath);
         try {
@@ -109,7 +109,6 @@ public class Compress {
     }
 
     public void compressionP(BitSequence[] input) {
-        BitSequence[] encoders = new BitSequence[input.length];
         for(int i=0;i<input.length;i++){
             int k=(int)(1.447*Math.log((1-input[i].getP())*Math.pow(0.693,2)*Math.pow(input[i].getP(),-1)));
             if(k<=0)
@@ -117,9 +116,13 @@ public class Compress {
             if(k>=16)
                 k=16;
             HashFunction[] hashes = creatHashes(k);
-            this.HashesList.add(hashes);
-            encoders[i] = encoder.Encoder(input[i].getBitCount(), (int) (input[i].getBitCount()*0.271),hashes,input[i]);
-            System.out.println(input[i].getP()+"\t"+k+"\t"+(double)(input[i].getBitCount())/(double)(encoders[i].getBitCount()));
+
+            long startTime = System.nanoTime();
+            BitSequence b=encoder.encoder(input[i].getBitCount(),(int)(input[i].getBitCount()*input[i].getP()*k*1.447+1),hashes,input[i]);
+            //decoder.decoder(input[i].getBitCount(),(int)(input[i].getBitCount()*input[i].getP()*k*1.447+1),hashes,b);
+            long endTime = System.nanoTime();
+            System.out.println(input[i].getP()+"\t"+k+"\t"+(double)(input[i].getBitCount())/(double)(b.getBitCount()));
+            //System.out.println(input[i].getP()+"\t"+(endTime - startTime));
         }
     }
 }
